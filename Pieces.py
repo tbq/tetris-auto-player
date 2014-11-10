@@ -1,182 +1,155 @@
 import sys
+import numpy as np
+
+def printGrid(grid):
+	print ''.join(['-'] * (grid.shape[1]+2))
+	for r in reversed(xrange(grid.shape[0])):
+		symbols = ['|'] + ['X' if val else ' ' for val in grid[r,:]] + ['|']
+		print ''.join(symbols)
+	print ''.join(['-'] * (grid.shape[1]+2))
 
 class Piece():
-	def __init__(self):		pass
-	def rotations(self):		pass
-	def printPiece(self, piecePos):
+	def __init__(self):		
+		pass
+	
+	@classmethod
+	def createBase(cls):
+		raise NotImplementedError()
+	
+	@classmethod
+	def createRotations(cls):
+		base = cls.createBase()
+		outputs = [base]
+		while True:
+			rotated = np.rot90(outputs[-1])
+			if not np.array_equal(rotated, base):
+				outputs.append(rotated)
+			else:
+				break
+		return outputs
+	
+	@classmethod
+	def getRotations(cls):
+		if cls.rotations is None:
+			cls.rotations = cls.createRotations()	
+		return cls.rotations
+	
+	def printGrid(self, piecePos):
 		for row in piecePos:
 			for col in row:
 				sys.stdout.write(str(col) + " ") 
 			sys.stdout.write("\n") 
 	
 class OPiece(Piece):
-	def rotations(self):
-		base = [
-			[1,1],
-			[1,1]
-		]
-		return [(base, 2, 2)]
-		
+	
+	rotations = None
+	
+	@classmethod
+	def createBase(cls):
+		print "O"
+		return np.ones((2, 2), np.int8)
+	
 class IPiece(Piece):
-	def rotations(self):
-		rots = []
-		vert = [
-			[1],
-			[1],
-			[1],
-			[1]
-		]
-		rots.append((vert, 4, 1))
-		hor = [[1,1,1,1]]
-		rots.append((hor, 1, 4))
-		return rots
-		
+	
+	rotations = None
+	
+	@classmethod
+	def createBase(cls):
+		print "I"
+		return np.ones((1, 4), np.int8)
+	
 class TPiece(Piece):
-	def rotations(self):
-		rots = []
-		p1 = [
-			[1,1,1],
-			[0,1,0]
-		]
-		rots.append((p1, 2, 3))
-		p2 = [
-			[0,1],
-			[1,1],
-			[0,1]
-		]
-		rots.append((p2, 3, 2))
-		p3 = [
-			[0,1,0],
-			[1,1,1]
-		]
-		rots.append((p3, 2, 3))
-		p4 = [
-			[1,0],
-			[1,1],
-			[1,0]
-		]
-		rots.append((p4, 3, 2))
-		
-		return rots
+	rotations = None
+	
+	@classmethod
+	def createBase(cls):
+		print "T"
+		base = np.ones((2, 3), np.int8)
+		base[0,0] = 0
+		base[0,2] = 0
+		return base
 		
 class SPiece(Piece):
-	def rotations(self):
-		rots = []
-		p1 = [
-			[0,1,1],
-			[1,1,0]
-		]
-		rots.append((p1, 2, 3))	
-		p2 = [
-			[1,0],
-			[1,1],
-			[0,1]
-		]
-		rots.append((p2, 3, 2))
-		
-		return rots
+	rotations = None
+	
+	@classmethod
+	def createBase(cls):
+		print "S"
+		base = np.ones((3, 2), np.int8)
+		base[0,0] = 0
+		base[2,1] = 0
+		return base
 		
 class ZPiece(Piece):
-	def rotations(self):
-		rots = []
-		p1 = [
-			[1,1,0],
-			[0,1,1]
-		]
-		rots.append((p1, 2, 3))	
-		p2 = [
-			[0,1],
-			[1,1],
-			[1,0]
-		]
-		rots.append((p2, 3, 2))
-		
-		return rots
+	rotations = None
+	
+	@classmethod
+	def createBase(cls):
+		print "Z"
+		base = np.ones((3, 2), np.int8)
+		base[0,1] = 0
+		base[2,0] = 0
+		return base
 		
 class LPiece(Piece):
-	def rotations(self):
-		rots = []
-		p1 = [
-			[0,0,1],
-			[1,1,1]
-		]
-		rots.append((p1, 2, 3))	
-		p2 = [
-			[1,0],
-			[1,0],
-			[1,1]
-		]
-		rots.append((p2, 3, 2))
-		p3 = [
-			[1,1,1],
-			[1,0,0]
-		]
-		rots.append((p3, 2, 3))	
-		p4 = [
-			[1,1],
-			[0,1],
-			[0,1]
-		]
-		rots.append((p4, 3, 2))
-		return rots
+	rotations = None
+	
+	@classmethod
+	def createBase(cls):
+		print "L"
+		base = np.ones((3, 2), np.int8)
+		base[1,1] = 0
+		base[2,1] = 0
+		return base
 		
 class JPiece(Piece):
-	def rotations(self):
-		rots = []
-		p1 = [
-			[1,1,1],
-			[0,0,1]
-		]
-		rots.append((p1, 2, 3))	
-		p2 = [
-			[0,1],
-			[0,1],
-			[1,1]
-		]
-		rots.append((p2, 3, 2))
-		p3 = [
-			[1,0,0],
-			[1,1,1]
-		]
-		rots.append((p3, 2, 3))	
-		p4 = [
-			[1,1],
-			[1,0],
-			[1,0]
-		]
-		rots.append((p4, 3, 2))
-		return rots		
+	rotations = None
+	
+	@classmethod
+	def createBase(cls):
+		print "J"
+		base = np.ones((3, 2), np.int8)
+		base[1,0] = 0
+		base[2,0] = 0
+		return base	
 		
 def pieceById(id):
 	if id == 0:
-		piece = OPiece()
+		oPiece = OPiece()
 	elif id == 1:
-		piece = IPiece()
+		oPiece = IPiece()
 	elif id == 2:
-		piece = TPiece()
+		oPiece = TPiece()
 	elif id == 3:
-		piece = SPiece()
+		oPiece = SPiece()
 	elif id == 4:
-		piece = ZPiece()
+		oPiece = ZPiece()
 	elif id == 5:
-		piece = LPiece()
+		oPiece = LPiece()
 	else: # id == 6
-		piece = JPiece()
-	return piece
+		oPiece = JPiece()
+	return oPiece
 	
 def pieceNameById(id):
 	if id == 0:
-		piece = 'O'
+		oPiece = 'O'
 	elif id == 1:
-		piece = 'I'
+		oPiece = 'I'
 	elif id == 2:
-		piece = 'T'
+		oPiece = 'T'
 	elif id == 3:
-		piece = 'S'
+		oPiece = 'S'
 	elif id == 4:
-		piece = 'Z'
+		oPiece = 'Z'
 	elif id == 5:
-		piece = 'L'
+		oPiece = 'L'
 	else: # id == 6
-		piece = 'J'
-	return piece
+		oPiece = 'J'
+	return oPiece
+
+if __name__ == "__main__":
+	l = [IPiece(), OPiece(), TPiece(), SPiece(), ZPiece(), LPiece(), JPiece()]
+	for x in l:
+		print len(x.getRotations())
+		for rotation in x.getRotations():
+			printGrid(rotation)

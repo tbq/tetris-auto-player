@@ -2,22 +2,22 @@ import sys
 import random
 from copy import deepcopy
 from Pieces import *
-from Board import *
+from board_tools import *
 
 def main():
 	print "\nBaseline Tetris\n============================\n"
 	
 	board = Board()
-	#print board.board
+	#print grid.grid
 	#print '====='
-	#board.board[21][0] = 1
+	#grid.grid[21][0] = 1
 	board.printScreen()
 	
 	for i in range(7):
-		piece = pieceById(i)
-		for p, r, c in piece.rotations():
+		oPiece = pieceById(i)
+		for p, r, c in oPiece.getRotations():
 			print '====', r, "=", c
-			piece.printPiece(p)		
+			oPiece.printGrid(p)		
 		print '===========\n==========='
 		
 	boardChange = [
@@ -36,7 +36,7 @@ def main():
 		
 	for i in range(bcL):
 		for j in range(10):
-			board.board[i+board.Hlev - bcL - 1][j] = boardChange[i][j]
+			board.grid[i+board.Hlev - bcL - 1][j] = boardChange[i][j]
 			
 	board.Hlev -= 5
 			
@@ -44,27 +44,27 @@ def main():
 	
 	board.printScreen()
 	#print 'REMOVING ONE LINE'
-	#board.removeLine(board.board, 19)
-	#board.printScreen()
+	#grid.removeLine(grid.grid, 19)
+	#grid.printScreen()
 	
-	#board.checkForLines(board.board)
-	#board.printScreen()
+	#grid.checkForLines(grid.grid)
+	#grid.printScreen()
 	
 	
 	print '==============\n==============\n============'
 	#pieza = SPiece()
-	#piezaRots = pieza.rotations()
+	#piezaRots = pieza.getRotations()
 	'''
-	for piece, r, c in piezaRots:
-		test = board.placePiece((piece, r, c), board.Hlev-r,0)
-		board.checkForLines(test)
-		board.printBoard(test)
-		print "La altura es %d" % board.checkHeight(test)
+	for oPiece, r, c in piezaRots:
+		test = grid.placePiece((oPiece, r, c), grid.Hlev-r,0)
+		grid.checkForLines(test)
+		grid.printBoard(test)
+		print "La altura es %d" % grid.checkHeight(test)
 		print '.'
 	'''	
 	print '==============\n=========\n=============='
 	
-	#board.tryPlacing(piezaRots[0])
+	#grid.tryPlacing(piezaRots[0])
 	
 	return board
 	
@@ -78,9 +78,9 @@ def readSequence(seq):
 		pieza = pieceById(p)
 		#print pieza
 		bester = (None, float("-inf"))
-		for piece,  r, c in pieza.rotations():
+		for oPiece,  r, c in pieza.getRotations():
 			#print '(%dx%d)' % (r,c)
-			bester = screen.tryPlacing((piece,r,c), bester)
+			bester = screen.tryPlacing((oPiece,r,c), bester)
 		if bester[0] is None:
 			#print "YOU SUCK!!!!!"
 			break
@@ -92,16 +92,8 @@ def readSequence(seq):
 			
 baseSeq = [0,1,2,3,4,5,6]
 
-def printSequence(seq):
-	pieceNames = []
-	for p in seq:
-		pieceNames.append(pieceNameById(p))
-	print pieceNames
-
-
 def simulateTetris(seq, seed):
-	
-	printSequence(seq)
+	print map(pieceNameById, seq)
 	
 	print 'Sequence Seed:', seed
 	lines, pieces = readSequence(seq)
