@@ -1,5 +1,7 @@
-import sys
 import numpy as np
+import util
+
+
 
 def printGrid(grid):
 	print ''.join(['-'] * (grid.shape[1]+2))
@@ -9,8 +11,17 @@ def printGrid(grid):
 	print ''.join(['-'] * (grid.shape[1]+2))
 
 class Piece():
-	def __init__(self):		
-		pass
+	def __init__(self, grid=None):
+		if grid is None:
+			grid = self.createBase()
+		self.grid = grid
+		self.h = util.gridHash(grid)
+		
+	def __hash__(self):
+		return self.h.__hash__()
+	
+	def __eq__(self, other):
+		return self.h == other.h
 	
 	@classmethod
 	def createBase(cls):
@@ -19,11 +30,11 @@ class Piece():
 	@classmethod
 	def createRotations(cls):
 		base = cls.createBase()
-		outputs = [base]
+		outputs = [Piece(base)]
 		while True:
-			rotated = np.rot90(outputs[-1])
+			rotated = np.rot90(outputs[-1].grid)
 			if not np.array_equal(rotated, base):
-				outputs.append(rotated)
+				outputs.append(Piece(rotated))
 			else:
 				break
 		return outputs
@@ -32,86 +43,94 @@ class Piece():
 	def getRotations(cls):
 		if cls.rotations is None:
 			cls.rotations = cls.createRotations()	
-		return cls.rotations
-	
-	def printGrid(self, piecePos):
-		for row in piecePos:
-			for col in row:
-				sys.stdout.write(str(col) + " ") 
-			sys.stdout.write("\n") 
+		return cls.rotations 
 	
 class OPiece(Piece):
-	
+	base = None
 	rotations = None
 	
 	@classmethod
 	def createBase(cls):
-		print "O"
-		return np.ones((2, 2), np.int8)
+		if cls.base is None:
+			print "O"
+			cls.base = np.ones((2, 2), np.int8)
+		return cls.base
 	
 class IPiece(Piece):
-	
+	base = None
 	rotations = None
 	
 	@classmethod
 	def createBase(cls):
-		print "I"
-		return np.ones((1, 4), np.int8)
+		if cls.base is None:
+			print "I"
+			cls.base = np.ones((1, 4), np.int8)
+		return cls.base
 	
 class TPiece(Piece):
+	base = None
 	rotations = None
 	
 	@classmethod
 	def createBase(cls):
-		print "T"
-		base = np.ones((2, 3), np.int8)
-		base[0,0] = 0
-		base[0,2] = 0
-		return base
+		if cls.base is None:
+			print "T"
+			cls.base = np.ones((2, 3), np.int8)
+			cls.base[0,0] = 0
+			cls.base[0,2] = 0
+		return cls.base
 		
 class SPiece(Piece):
+	base = None
 	rotations = None
 	
 	@classmethod
 	def createBase(cls):
-		print "S"
-		base = np.ones((3, 2), np.int8)
-		base[0,0] = 0
-		base[2,1] = 0
-		return base
+		if cls.base is None:
+			print "S"
+			cls.base = np.ones((3, 2), np.int8)
+			cls.base[0,0] = 0
+			cls.base[2,1] = 0
+		return cls.base
 		
 class ZPiece(Piece):
+	base = None
 	rotations = None
 	
 	@classmethod
 	def createBase(cls):
-		print "Z"
-		base = np.ones((3, 2), np.int8)
-		base[0,1] = 0
-		base[2,0] = 0
-		return base
+		if cls.base is None:
+			print "Z"
+			cls.base = np.ones((3, 2), np.int8)
+			cls.base[0,1] = 0
+			cls.base[2,0] = 0
+		return cls.base
 		
 class LPiece(Piece):
+	base = None
 	rotations = None
 	
 	@classmethod
 	def createBase(cls):
-		print "L"
-		base = np.ones((3, 2), np.int8)
-		base[1,1] = 0
-		base[2,1] = 0
-		return base
+		if cls.base is None:
+			print "L"
+			cls.base = np.ones((3, 2), np.int8)
+			cls.base[1,1] = 0
+			cls.base[2,1] = 0
+		return cls.base
 		
 class JPiece(Piece):
+	base = None
 	rotations = None
 	
 	@classmethod
 	def createBase(cls):
-		print "J"
-		base = np.ones((3, 2), np.int8)
-		base[1,0] = 0
-		base[2,0] = 0
-		return base	
+		if cls.base is None:
+			print "J"
+			cls.base = np.ones((3, 2), np.int8)
+			cls.base[1,0] = 0
+			cls.base[2,0] = 0
+		return cls.base	
 		
 def pieceById(id):
 	if id == 0:
@@ -147,9 +166,28 @@ def pieceNameById(id):
 		oPiece = 'J'
 	return oPiece
 
+def pieceByName(name):
+	if name == 'O':
+		return OPiece()
+	elif name == 'I':
+		return IPiece()
+	elif name == 'T':
+		return TPiece()
+	elif name == 'S':
+		return SPiece()
+	elif name == 'Z':
+		return ZPiece()
+	elif name == 'L':
+		return LPiece()
+	elif name == 'J':
+		return JPiece()
+	return None
+
+defaultList = [IPiece(), OPiece(), TPiece(), SPiece(), ZPiece(), LPiece(), JPiece()]
+
 if __name__ == "__main__":
 	l = [IPiece(), OPiece(), TPiece(), SPiece(), ZPiece(), LPiece(), JPiece()]
 	for x in l:
 		print len(x.getRotations())
 		for rotation in x.getRotations():
-			printGrid(rotation)
+			printGrid(rotation.grid)

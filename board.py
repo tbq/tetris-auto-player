@@ -33,11 +33,13 @@ def removeLines(grid, fullLines):
 		grid[r,:].fill(0)
 
 class Board():
-	def __init__(self, grid = np.zeros((6, 6), np.int8), linesCompleted = 0):
+	def __init__(self, grid = np.zeros((20, 10), np.int8), linesCompleted = 0, nPieces = 0):
 		self.rows = grid.shape[0]
 		self.cols = grid.shape[1]
 		self.grid = grid
 		self.linesCompleted = linesCompleted
+		self.nPieces = nPieces
+		self.h = util.gridHash(grid)
 		
 	def extractContour(self, border):
 		contour = [0]
@@ -61,30 +63,58 @@ class Board():
 			for col in row:
 				print col
 			
-	def tryPlacing(self, pieceGrid):
+	def tryPlacing(self, piece):
+		pieceGrid = piece.grid
+		
 		maxCols = findBorder(self.grid)
 		contour = self.extractContour(maxCols)
 		
 		minPieceCols = findBorder(pieceGrid, isTop = False)
 		pieceContour = self.extractContour(minPieceCols)
-		print contour
-		print pieceContour
+# 		print contour
+# 		print pieceContour
 		
 		alignments = self.alignContour(contour, pieceContour)
-		print alignments
+# 		print alignments
+# 		printGrid(self.grid)
+
+# 		printGrid(pieceGrid)
 		shape = pieceGrid.shape
 		placements = []
 		for c, alignment in enumerate(alignments):
 			newGrid = np.copy(self.grid)
 			pos = (maxCols[c]-minPieceCols[0]-alignment+1, c)
-			print pos
-			newGrid[pos[0]:pos[0]+shape[0], pos[1]:pos[1]+shape[1]] += pieceGrid
-			reward = tryRemoveLines(newGrid, pos[0], pos[0]+shape[0])
-			placements.append((newGrid, reward))
+# 			print pos, shape
+			if pos[0] + shape[0] <= self.rows:
+				newGrid[pos[0]:pos[0]+shape[0], pos[1]:pos[1]+shape[1]] += pieceGrid
+				reward = tryRemoveLines(newGrid, pos[0], pos[0]+shape[0])
+				placements.append((newGrid, reward))
 		return placements
+	
+	def __hash__(self):
+		return self.h.__hash__()
+	
+	def __eq__(self, other):
+		return np.array_equal(self.grid, other.grid)
 	
 	def updateGrid(self, grid):
 		self.grid = grid
+		self.h = util.gridHash(grid)
+		
+	def findMaxHeight(self):
+		return max(findBorder(self.grid)) + 1
+	
+	def findAvgHeight(self):
+		return sum(findBorder(self.grid))/self.cols
+	
+	def countHoles(self):
+		border = findBorder(self.grid)
+		c = 0
+		for col in xrange(self.cols):
+			for row in xrange(border[col]):
+				if self.grid[row,col] == 0:
+					c += 1
+		return c
 				
 if __name__ == "__main__":		
 	board = Board()
@@ -98,10 +128,6 @@ if __name__ == "__main__":
 	placements = board.tryPlacing(oPiece.getRotations()[0])
 	board.updateGrid(placements[2][0])
 	placements = board.tryPlacing(sPiece.getRotations()[0])
-	board.updateGrid(placements[4][0])
-	placements = board.tryPlacing(tPiece.getRotations()[1])
-	board.updateGrid(placements[4][0])
-	placements = board.tryPlacing(lPiece.getRotations()[1])
 	for grid, reward in placements:
 		printGrid(grid)
 		print 'reward', reward

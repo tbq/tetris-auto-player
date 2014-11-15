@@ -6,6 +6,8 @@ Created on Nov 9, 2014
 import random
 import math
 import collections
+import Pieces
+import board
 
 # Abstract class: an RLAlgorithm performs reinforcement learning.  All it needs
 # to know is the set of available actions to take.  The simulator (see
@@ -70,6 +72,84 @@ class QLearningAlgorithm(RLAlgorithm):
         for f, v in self.featureExtractor(state, action):
             self.weights[f] += self.getStepSize() * residual * v
         # END_YOUR_CODE
+        
+class Agent:
+    def __init__(self, index=0):
+        self.index = index
+
+    def getAction(self, state):
+        raise NotImplementedError("Override me")
+        
+class MultiAgentSearchAgent(Agent):
+    """
+    This class provides some common elements to all of your
+    multi-agent searchers.  Any methods defined here will be available
+    to the MinimaxPacmanAgent, AlphaBetaPacmanAgent & ExpectimaxPacmanAgent.
+
+    You *do not* need to make any changes here, but you can if you want to
+    add functionality to all your adversarial search agents.  Please do not
+    remove anything, however.
+
+    Note: this is an abstract class: one that should not be instantiated.  It's
+    only partially specified, and designed to be extended.  Agent (game.py)
+    is another abstract class.
+    """
+
+    def __init__(self, depth = '1'):
+        self.index = 0
+        self.evaluationFunction = evaluationFunction
+        self.depth = int(depth)
+        
+class ExpectimaxAgent(MultiAgentSearchAgent):
+    """
+      Your expectimax agent
+    """
+    def getAction(self, gameState):
+
+        def computeValue(gameState, index, depth):
+            actions = gameState.getLegalActions(index)
+            if gameState.isWin() or gameState.isLose():
+                return gameState.getScore()
+            elif depth == 0:
+                return self.evaluationFunction(gameState)
+            else:
+                values = []
+                for action in actions:
+                    successorState = gameState.generateSuccessor(index, action)
+                    newIndex = (index + 1) % gameState.getNumAgents()
+                    newDepth = depth if newIndex != 0 else depth-1
+                    value = computeValue(successorState, newIndex, newDepth)
+                    values.append(value)
+                if index == 0:
+                    return max(values)
+                else:
+                    return sum(values) / float(len(actions))
+    
+        actions = gameState.getLegalActions(self.index)
+        pairs = []
+        for action in actions:
+            successorState = gameState.generateSuccessor(self.index, action)
+            value = computeValue(successorState, self.index+1, self.depth)
+            pairs.append((action, value))
+        
+        maxPair = max(pairs, key=lambda x: x[1]) 
+        return maxPair[0]
+    
+class TetrisPieceAgent(Agent):
+    def __init__(self, index=1):
+        self.index = index
+
+    def getAction(self, state):
+        return state.pieceGenerator.generateNewPiece()
+
+def evaluationFunction(gameState):
+    if gameState.isWin():
+        return 1000
+    elif gameState.isLose():
+        return -100000
+    else:
+        score = 10*gameState.score -5*gameState.board.findMaxHeight() - 5*gameState.board.findAvgHeight() - 5*gameState.board.countHoles()
+        return score
         
 # Perform |numTrials| of the following:
 # On each trial, take the MDP |mdp| and an RLAlgorithm |rl| and simulates the

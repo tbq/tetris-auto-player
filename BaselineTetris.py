@@ -2,10 +2,10 @@ import sys
 import random
 from copy import deepcopy
 from Pieces import *
-from board_tools import *
+from board import *
 
 def main():
-	print "\nBaseline Tetris\n============================\n"
+	print "\nBaseline tetris\n============================\n"
 	
 	board = Board()
 	#print grid.grid
