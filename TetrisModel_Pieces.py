@@ -1,21 +1,20 @@
+#
+#	Authors:	BrianTruong
+#					PatricioFigueroa
+#
+#	Tetris Model: Tetrominoes (Pieces)
+#
+
 import numpy as np
 import util
 
-
-
-def printGrid(grid):
-	print ''.join(['-'] * (grid.shape[1]+2))
-	for r in reversed(xrange(grid.shape[0])):
-		symbols = ['|'] + ['X' if val else ' ' for val in grid[r,:]] + ['|']
-		print ''.join(symbols)
-	print ''.join(['-'] * (grid.shape[1]+2))
-
 class Piece():
-	def __init__(self, grid=None):
+	def __init__(self, grid=None, id=0):
 		if grid is None:
-			grid = self.createBase()
+			grid, id = self.createBase()
 		self.grid = grid
 		self.h = util.gridHash(grid)
+		self.id = id
 		
 	def __hash__(self):
 		return self.h.__hash__()
@@ -29,7 +28,7 @@ class Piece():
 	
 	@classmethod
 	def createRotations(cls):
-		base = cls.createBase()
+		base, id = cls.createBase()
 		outputs = [Piece(base)]
 		while True:
 			rotated = np.rot90(outputs[-1].grid)
@@ -52,9 +51,9 @@ class OPiece(Piece):
 	@classmethod
 	def createBase(cls):
 		if cls.base is None:
-			print "O"
+			#print "O"
 			cls.base = np.ones((2, 2), np.int8)
-		return cls.base
+		return (cls.base, 1)
 	
 class IPiece(Piece):
 	base = None
@@ -63,9 +62,9 @@ class IPiece(Piece):
 	@classmethod
 	def createBase(cls):
 		if cls.base is None:
-			print "I"
+			#print "I"
 			cls.base = np.ones((1, 4), np.int8)
-		return cls.base
+		return (cls.base, 2)
 	
 class TPiece(Piece):
 	base = None
@@ -74,11 +73,11 @@ class TPiece(Piece):
 	@classmethod
 	def createBase(cls):
 		if cls.base is None:
-			print "T"
+			#print "T"
 			cls.base = np.ones((2, 3), np.int8)
 			cls.base[0,0] = 0
 			cls.base[0,2] = 0
-		return cls.base
+		return (cls.base,3)
 		
 class SPiece(Piece):
 	base = None
@@ -87,11 +86,11 @@ class SPiece(Piece):
 	@classmethod
 	def createBase(cls):
 		if cls.base is None:
-			print "S"
+			#print "S"
 			cls.base = np.ones((3, 2), np.int8)
 			cls.base[0,0] = 0
 			cls.base[2,1] = 0
-		return cls.base
+		return (cls.base, 4)
 		
 class ZPiece(Piece):
 	base = None
@@ -100,11 +99,11 @@ class ZPiece(Piece):
 	@classmethod
 	def createBase(cls):
 		if cls.base is None:
-			print "Z"
+			#print "Z"
 			cls.base = np.ones((3, 2), np.int8)
 			cls.base[0,1] = 0
 			cls.base[2,0] = 0
-		return cls.base
+		return (cls.base,5)
 		
 class LPiece(Piece):
 	base = None
@@ -113,11 +112,11 @@ class LPiece(Piece):
 	@classmethod
 	def createBase(cls):
 		if cls.base is None:
-			print "L"
+			#print "L"
 			cls.base = np.ones((3, 2), np.int8)
 			cls.base[1,1] = 0
 			cls.base[2,1] = 0
-		return cls.base
+		return (cls.base,6)
 		
 class JPiece(Piece):
 	base = None
@@ -126,11 +125,11 @@ class JPiece(Piece):
 	@classmethod
 	def createBase(cls):
 		if cls.base is None:
-			print "J"
+			#print "J"
 			cls.base = np.ones((3, 2), np.int8)
 			cls.base[1,0] = 0
 			cls.base[2,0] = 0
-		return cls.base	
+		return (cls.base,7)
 		
 def pieceById(id):
 	if id == 0:
@@ -188,6 +187,6 @@ defaultList = [IPiece(), OPiece(), TPiece(), SPiece(), ZPiece(), LPiece(), JPiec
 if __name__ == "__main__":
 	l = [IPiece(), OPiece(), TPiece(), SPiece(), ZPiece(), LPiece(), JPiece()]
 	for x in l:
-		print len(x.getRotations())
+		print x, '(%d rotations)' % len(x.getRotations()), '[id=%d]' % x.id
 		for rotation in x.getRotations():
-			printGrid(rotation.grid)
+			util.printGrid(rotation.grid)

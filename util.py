@@ -1,9 +1,20 @@
-'''
-Created on Nov 14, 2014
+#
+#	Authors:	BrianTruong
+#					PatricioFigueroa
+#
+#	Tetris Utilities
+#
 
-@author: BrianTruong
-'''
+import numpy as np
+import util
 
+def printGrid(grid):
+	print ''.join(['-'] * (grid.shape[1]+2))
+	for r in reversed(xrange(grid.shape[0])):
+		symbols = ['|'] + ['X' if val else ' ' for val in grid[r,:]] + ['|']
+		print ''.join(symbols)
+	print ''.join(['-'] * (grid.shape[1]+2))
+	
 def gridHash(grid):
     h = 0
     for elem in grid.flat:

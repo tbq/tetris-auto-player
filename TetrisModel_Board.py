@@ -1,14 +1,21 @@
+#
+#	Authors:	BrianTruong
+#					PatricioFigueroa
+#
+#	Tetris Model: Board (Screen)
+#
+
 import sys
 import numpy as np
 from copy import deepcopy
-from Pieces import *
+from TetrisModel_Pieces import *
 
 def findBorder(a, isTop = True):
 	border = np.empty((a.shape[1]), np.int8)
 	border.fill(-1)
 	for c in xrange(a.shape[1]):
 		# search from top if isTop and from bottom otherwise
-		searchedRange = reversed(xrange(a.shape[0])) if isTop else xrange(a.shape[0])
+		searchedRange = xrange(a.shape[0]-1,-1,-1) if isTop else xrange(a.shape[0])
 		for r in searchedRange:
 			if a[r,c] != 0:
 				border[c] = r
@@ -103,6 +110,32 @@ class Board():
 		
 	def findMaxHeight(self):
 		return max(findBorder(self.grid)) + 1
+		
+	def findHeightGap(self):
+		boardBorder = findBorder(self.grid)
+		highest = max(boardBorder)
+		lowest = min(boardBorder)
+		return highest - lowest
+		
+	def getHorizontalRoughness(self):
+		changes = 0;
+		val = self.grid[0][0]
+		for i in xrange(self.rows):
+			for j in xrange(self.cols):
+				if val != self.grid[i][j]:
+					val = self.grid[i][j]
+					changes += 1		
+		return changes
+		
+	def getVerticalRoughness(self):
+		changes = 0;
+		val = self.grid[0][0]
+		for j in xrange(self.cols):
+			for i in xrange(self.rows):
+				if val != self.grid[i][j]:
+					val = self.grid[i][j]
+					changes += 1		
+		return changes	
 	
 	def findAvgHeight(self):
 		return sum(findBorder(self.grid))/self.cols
@@ -115,10 +148,39 @@ class Board():
 				if self.grid[row,col] == 0:
 					c += 1
 		return c
+		
+	def extraFeatures(self):
+		holes = 0
+		wells = 0
+		weightedHoles = 0
+		highestHole = 0
+		deepestHole = self.rows
+		filled = 0
+		weightedFilled = 0
+		border = findBorder(self.grid)
+		for col in xrange(self.cols):
+			wellCount = 0
+			for row in xrange(border[col]):
+				if self.grid[row,col] == 0:
+					holes += 1
+					weightedHoles += row
+					if deepestHole > row:
+						deepestHole = row
+					if highestHole < row:
+						highestHole = row
+					wellCount += 1
+					if wellCount == 3:
+						wells += 1
+				else:
+					wellCount = 0
+					filled += 1
+					weightedFilled += row
+			
+		return (holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
 				
 if __name__ == "__main__":		
 	board = Board()
-	printGrid(board.grid)
+	util.printGrid(board.grid)
 	oPiece = OPiece()
 	sPiece = SPiece()
 	tPiece = TPiece()
@@ -127,7 +189,13 @@ if __name__ == "__main__":
 	board.updateGrid(placements[0][0])
 	placements = board.tryPlacing(oPiece.getRotations()[0])
 	board.updateGrid(placements[2][0])
+	placements = board.tryPlacing(oPiece.getRotations()[0])
+	board.updateGrid(placements[7][0])
+	placements = board.tryPlacing(oPiece.getRotations()[0])
+	board.updateGrid(placements[0][0])
 	placements = board.tryPlacing(sPiece.getRotations()[0])
 	for grid, reward in placements:
-		printGrid(grid)
+		util.printGrid(grid)
 		print 'reward', reward
+		#print 'horRough', board.getHorizontalRoughness(grid)
+		#print 'verRough', board.getVerticalRoughness(grid)
