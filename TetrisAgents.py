@@ -97,7 +97,7 @@ class ExpectimaxTetrisAgent(Agent):
 		bestOptions = sorted(options, key=lambda x: x[0], reverse=True)
 		maxOptions = [act for val, act in bestOptions if val == bestOptions[0][0]]
 		
-		print [val for val, act in options], '\n', [val for val, act in bestOptions], len(maxOptions)
+		#print [val for val, act in options], '\n', [val for val, act in bestOptions], len(maxOptions)
 		
 		return random.choice(maxOptions);
 
