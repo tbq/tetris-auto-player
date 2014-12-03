@@ -47,6 +47,7 @@ class Board():
 		self.linesCompleted = linesCompleted
 		self.nPieces = nPieces
 		self.h = util.gridHash(grid)
+		self.border = findBorder(self.grid)
 		
 	def extractContour(self, border):
 		contour = [0]
@@ -73,7 +74,7 @@ class Board():
 	def tryPlacing(self, piece):
 		pieceGrid = piece.grid
 		
-		maxCols = findBorder(self.grid)
+		maxCols = self.border
 		contour = self.extractContour(maxCols)
 		
 		minPieceCols = findBorder(pieceGrid, isTop = False)
@@ -107,15 +108,21 @@ class Board():
 	def updateGrid(self, grid):
 		self.grid = grid
 		self.h = util.gridHash(grid)
+		self.border = findBorder(self.grid)
 		
 	def findMaxHeight(self):
-		return max(findBorder(self.grid)) + 1
+		return max(self.border) + 1
 		
 	def findHeightGap(self):
-		boardBorder = findBorder(self.grid)
+		boardBorder = self.border
 		highest = max(boardBorder)
 		lowest = min(boardBorder)
 		return highest - lowest
+	
+	def findDensity(self):
+		nNonzero = np.count_nonzero(self.grid)
+		sz = self.cols * self.findMaxHeight()
+		return float(nNonzero) / sz if sz > 0 else 1
 		
 	def getHorizontalRoughness(self):
 		changes = 0;
@@ -138,10 +145,10 @@ class Board():
 		return changes	
 	
 	def findAvgHeight(self):
-		return sum(findBorder(self.grid))/self.cols
+		return sum(self.border)/self.cols
 	
 	def countHoles(self):
-		border = findBorder(self.grid)
+		border = self.border
 		c = 0
 		for col in xrange(self.cols):
 			for row in xrange(border[col]):
@@ -176,7 +183,13 @@ class Board():
 					filled += 1
 					weightedFilled += row
 			
-		return (holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
+# 		return (holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
+		hasHole = (holes >= 1)
+		has2Holes = (holes >= 2)
+		has4Holes = (holes >= 4)
+		has8Holes = (holes >= 8)
+		has16Holes = (holes >= 16)
+		return (hasHole, has2Holes, has4Holes, has8Holes, has16Holes, 0, 0, 0, 0, 0, 0)
 				
 if __name__ == "__main__":		
 	board = Board()

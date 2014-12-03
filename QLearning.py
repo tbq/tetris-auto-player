@@ -56,7 +56,7 @@ class QLearningAlgorithm(RLAlgorithm):
 
     # Call this function to get the step size to update the weights.
     def getStepSize(self):
-        return 1.0 / math.sqrt(self.numIters)
+        return 0.1 / math.sqrt(self.numIters)
 
     # We will call this function with (s, a, r, s'), which you should use to update |weights|.
     # Note that if s is a terminal state, then s' will be None.  Remember to check for this.
@@ -64,13 +64,13 @@ class QLearningAlgorithm(RLAlgorithm):
     # self.getQ() to compute the current estimate of the parameters.
     def incorporateFeedback(self, state, action, reward, newState):
         curPrediction = self.getQ(state, action)
-        actions = self.actions(newState)
+        actions = self.actions(newState) if newState else []
         newStateOptValue = max(self.getQ(newState, a) for a in actions) if actions else 0
         residual = (reward + self.discount * newStateOptValue) - curPrediction
         for i, v in enumerate(self.featureExtractor(state, action)):
             self.weights[i] += self.getStepSize() * residual * v
             
-def simulate(mdp, rl, numTrials=10, maxIterations=1000, verbose=False):
+def simulate(mdp, rl, numTrials=10, maxIterations=100, verbose=False):
     # Return i in [0, ..., len(probs)-1] with probability probs[i].
     def sample(probs):
         target = random.random()
@@ -87,7 +87,9 @@ def simulate(mdp, rl, numTrials=10, maxIterations=1000, verbose=False):
         totalDiscount = 1
         totalReward = 0
         for _ in range(maxIterations):
-            util.printGrid(state.board.grid)
+            if state is None:
+                break
+            #util.printGrid(state.board.grid)
             action = rl.getAction(state)
             if action is None:
                 break
@@ -134,7 +136,10 @@ class TetrisGameMDP():
         successors = [nextState.generateSuccessor(1, oppoAction) for oppoAction in oppoActions]
         output = []
         for successor in successors:
-            if successor.isWin() or successor.isLose():
+            if successor.isWin():
+                successor = None
+            elif successor.isLose():
+                reward = -100
                 successor = None
             output.append((successor, prob, reward))
         return output
@@ -154,9 +159,9 @@ if __name__ == "__main__":
         return output
     
     model = TetrisGameMDP(TetrisMDP(), ExpectimaxTetrisAgent(0, 1, evaluator), FinitePieceGenerator(baseSeq))
-    weights = [1, 5, -1, -1, -1, -1, -1, -10, 0, 0, 0, 0, 0, 0]
-    qlAlgo = QLearningAlgorithm(model.actions, model.discount(), featureExtractor, [0] * 14)
-    qlRewards = simulate(model, qlAlgo, numTrials = 10)
+    weights = [0.10000000000000001, 0.5, -44.892192895842715, -88.868713917352991, -9.0845044328524125, 99.48473353935913, -0.10000000000000001, -0.10000000000000001, -46.3552758541178784, -44.894981251780582, -49.903753991739844, -48.776916252514777, -56.009249265806467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    qlAlgo = QLearningAlgorithm(model.actions, model.discount(), featureExtractor, weights)
+    qlRewards = simulate(model, qlAlgo, numTrials = 50)
     qlAvgReward = float(sum(qlRewards))/len(qlRewards)
     print qlAlgo.weights
     print qlAvgReward

@@ -27,6 +27,8 @@ class GameState:
 		self.rounds = rounds # total number of plays done = total number of pieces processed by our agent
 		self.lines = lines
 		self.tetris = tetris.TetrisMDP()
+		if self.board.findMaxHeight() >= self.board.rows:
+			self.lose = True
 
 	def isGameOver(self):
 		return self.lose or self.win
@@ -99,10 +101,11 @@ class Game:
 	def run(self):
 		agentIndex = 0
 		while not self.gameState.isGameOver():
+			if agentIndex == 0:
+				util.printGrid(self.gameState.board.grid)
 
 			agent = self.agents[agentIndex]
 			action = agent.getAction(self.gameState)
-			print action
 			
 			self.moveHistory.append((agentIndex, action))
 			
@@ -117,7 +120,7 @@ class Game:
 		#util.printGrid(self.moveHistory[-3][1][0])
 		print 'Final score:', self.gameState.score
 		print 'Lines completed:', self.gameState.lines
-		print 'Pieces played:', self.gameState.rounds
+		print 'Pieces played:', self.gameState.rounds - 1
 		
 def readWeights(filename):
 	wF = open(filename)
@@ -137,7 +140,8 @@ def main(argc, argv):
 	baseSeq = [0,1,2,3,4,5,6]*20;
 	#print baseSeq, "\n====\n"
 	
-	seed(13);
+	#seed(21);
+	seed(21)
 	shuffle(baseSeq);
 	
 	#print baseSeq
@@ -147,7 +151,12 @@ def main(argc, argv):
 	else:
 		weightFile = 'weights.tetris'
 		
-	weights = readWeights(weightFile)
+	#weights = readWeights(weightFile)
+	weights = [0.10000000000000001, 0.5, -44.892192895842715, -88.868713917352991, -9.0845044328524125, 99.48473353935913, -0.10000000000000001, -0.10000000000000001, -46.3552758541178784, -44.894981251780582, -49.903753991739844, -48.776916252514777, -56.009249265806467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	#weights = [0.10000000000000001, 18.692192314534012, -30.559441135215451, -79.790955493495701, -3.0284522805710377, 117.61079877952663, -0.10000000000000001, -0.10000000000000001, -17.936666592822963, -21.197595951521954, -30.934875542030095, -33.86864786051256, -45.78751684601162, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	#weights = [0.10000000000000001, 8.9290518982815605, -27.543567204530063, -74.690538168473211, -4.2843605308798809, 99.484733539359127, -0.10000000000000001, -0.10000000000000001, -24.545680551585356, -24.42373648813615, -31.173483591026667, -33.443551266304716, -39.087170373181067, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	#weights = [0.10000000000000001, 0.5, -20.035879911365605, -66.0879108327198, -5.6233288221681255, 99.484733539359127, -0.10000000000000001, -0.10000000000000001, -26.993167882850717, -24.346022953567569, -27.787043799824712, -22.509037540754889, -27.041543811219753, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+	#weights = [0.10000000000000001, 0.5, -44.892192895842712, -88.868713917352991, -9.0845044328524125, 110.40108328734912, -0.10000000000000001, -0.10000000000000001, -31.88725515464564, -31.997002607579162, -37.281055312507362, -36.427017385752833, -44.934307987291923, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 	#print weights
 	
 	gameLoop = Game()

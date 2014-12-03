@@ -42,39 +42,20 @@ class AdvancedEvaluator(Evaluator):
 		phi = []
 		
 		# Basic features from state
-		phi.append(gameState.score)
-		phi.append(gameState.lines)
+		phi.append(gameState.score * 0)
+		phi.append(gameState.lines * 0)
 		
 		# Height features
-		phi.append(gameState.board.findMaxHeight())
-		phi.append(gameState.board.findAvgHeight())
-		phi.append(gameState.board.findHeightGap())
+		phi.append(gameState.board.findMaxHeight() / float(gameState.board.rows))
+		phi.append(gameState.board.findAvgHeight() / float(gameState.board.rows))
+		phi.append(gameState.board.findHeightGap() / float(gameState.board.rows))
+		
+		# Density features
+		phi.append(gameState.board.findDensity())
 		
 		# Board shape features
-		phi.append(gameState.board.getHorizontalRoughness())
-		phi.append(gameState.board.getVerticalRoughness())
-
-		#(holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
-		extraFeats = gameState.board.extraFeatures()
-		phi.extend(extraFeats)
-				
-		return phi
-	
-	def featureExtractor2(self, gameState):
-		phi = []
-		
-		# Basic features from state
-		phi.append(gameState.score)
-		phi.append(gameState.lines)
-		
-		# Height features
-		phi.append(gameState.board.findMaxHeight())
-		phi.append(gameState.board.findAvgHeight())
-		phi.append(gameState.board.findHeightGap())
-		
-		# Board shape features
-		phi.append(gameState.board.getHorizontalRoughness())
-		phi.append(gameState.board.getVerticalRoughness())
+		phi.append(gameState.board.getHorizontalRoughness() * 0)
+		phi.append(gameState.board.getVerticalRoughness() * 0)
 
 		#(holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
 		extraFeats = gameState.board.extraFeatures()
