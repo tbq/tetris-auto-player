@@ -59,6 +59,28 @@ class AdvancedEvaluator(Evaluator):
 		phi.extend(extraFeats)
 				
 		return phi
+	
+	def featureExtractor2(self, gameState):
+		phi = []
+		
+		# Basic features from state
+		phi.append(gameState.score)
+		phi.append(gameState.lines)
+		
+		# Height features
+		phi.append(gameState.board.findMaxHeight())
+		phi.append(gameState.board.findAvgHeight())
+		phi.append(gameState.board.findHeightGap())
+		
+		# Board shape features
+		phi.append(gameState.board.getHorizontalRoughness())
+		phi.append(gameState.board.getVerticalRoughness())
+
+		#(holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
+		extraFeats = gameState.board.extraFeatures()
+		phi.extend(extraFeats)
+				
+		return phi
 			
 	def evaluate(self, gameState):
 		if gameState.isWin():

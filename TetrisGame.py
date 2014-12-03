@@ -102,6 +102,7 @@ class Game:
 
 			agent = self.agents[agentIndex]
 			action = agent.getAction(self.gameState)
+			print action
 			
 			self.moveHistory.append((agentIndex, action))
 			
