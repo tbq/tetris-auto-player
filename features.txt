@@ -1,0 +1,23 @@
+current score
+current number of cleared lines
+max height
+average height
+height gap
+max height divided by number of rows
+average height divided by number of rows
+height gap divided by number of rows
+density
+horizontal roughness
+vertical roughness
+hasHole
+has2Holes
+has4Holes
+has8Holes
+has16Holes
+holes
+wells
+weightedHoles
+highestHole
+deepestHole
+filled
+weightedFilled)
