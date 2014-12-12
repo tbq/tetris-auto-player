@@ -46,9 +46,16 @@ class AdvancedEvaluator(Evaluator):
 		phi.append(gameState.lines)
 		
 		# Height features
-		phi.append(gameState.board.findMaxHeight() / float(gameState.board.rows))
-		phi.append(gameState.board.findAvgHeight() / float(gameState.board.rows))
-		phi.append(gameState.board.findHeightGap() / float(gameState.board.rows))
+		nRows = gameState.board.rows
+		maxHeight = gameState.board.findMaxHeight()
+		avgHeight = gameState.board.findAvgHeight()
+		heightGap = gameState.board.findHeightGap()
+		phi.append(maxHeight)
+		phi.append(avgHeight)
+		phi.append(heightGap)
+		phi.append(maxHeight / float(nRows))
+		phi.append(avgHeight / float(nRows))
+		phi.append(heightGap / float(nRows))
 		
 		# Density features
 		phi.append(gameState.board.findDensity())

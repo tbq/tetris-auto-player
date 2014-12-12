@@ -149,11 +149,11 @@ def main(argc, argv):
 	if argc > 1:
 		weightFile = argv[1]
 	else:
-# 		weightFile = 'weights.tetris'
+		weightFile = 'weights.tetris'
 # 		weightFile = 'geneticWeights.tetris'
 # 		weightFile = 'geneticWeightsGen0.tetris'
 # 		weightFile = 'geneticWeightsGen1.tetris'
-		weightFile = 'geneticWeightsGen9.tetris'
+# 		weightFile = 'geneticWeightsGen9.tetris'
 		
 	weights = readWeights(weightFile)
 	#weights = [0.10000000000000001, 0.5, -44.892192895842715, -88.868713917352991, -9.0845044328524125, 99.48473353935913, -0.10000000000000001, -0.10000000000000001, -46.3552758541178784, -44.894981251780582, -49.903753991739844, -48.776916252514777, -56.009249265806467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
