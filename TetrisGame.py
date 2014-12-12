@@ -87,14 +87,14 @@ class Game:
 	def __init__(self):
 		pass
 
-	def startGame(self, seq=[], weights=[]):
+	def startGame(self, depth=1, seq=[], weights=[]):
 		self.moveHistory = []
 		tetrisGame = tetris.TetrisMDP()
 		beginState = tetrisGame.startState()
 		self.gameState = GameState(beginState[0], beginState[1], 0, False, False, 0, 0)
 		self.agents = [
 			#agents.ExpectimaxTetrisAgent(0, 1, evalFuncs.BaselineEvaluator()),
-			agents.ExpectimaxTetrisAgent(0, 1, evalFuncs.AdvancedEvaluator(weights)),
+			agents.ExpectimaxTetrisAgent(0, depth, evalFuncs.AdvancedEvaluator(weights)),
 			agents.FinitePieceGenerator(1, seq)
 		]
 	
@@ -160,7 +160,7 @@ def main(argc, argv):
 	#print weights
 	
 	gameLoop = Game()
-	gameLoop.startGame(baseSeq, weights)
+	gameLoop.startGame(1, baseSeq, weights)
 	gameLoop.run()
 	
 if __name__ == '__main__':
