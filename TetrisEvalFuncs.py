@@ -42,8 +42,8 @@ class AdvancedEvaluator(Evaluator):
 		phi = []
 		
 		# Basic features from state
-		phi.append(gameState.score * 0)
-		phi.append(gameState.lines * 0)
+		phi.append(gameState.score)
+		phi.append(gameState.lines)
 		
 		# Height features
 		phi.append(gameState.board.findMaxHeight() / float(gameState.board.rows))
@@ -54,8 +54,8 @@ class AdvancedEvaluator(Evaluator):
 		phi.append(gameState.board.findDensity())
 		
 		# Board shape features
-		phi.append(gameState.board.getHorizontalRoughness() * 0)
-		phi.append(gameState.board.getVerticalRoughness() * 0)
+		phi.append(gameState.board.getHorizontalRoughness())
+		phi.append(gameState.board.getVerticalRoughness())
 
 		#(holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
 		extraFeats = gameState.board.extraFeatures()

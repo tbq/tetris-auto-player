@@ -189,7 +189,7 @@ class Board():
 		has4Holes = (holes >= 4)
 		has8Holes = (holes >= 8)
 		has16Holes = (holes >= 16)
-		return (hasHole, has2Holes, has4Holes, has8Holes, has16Holes, 0, 0, 0, 0, 0, 0)
+		return (hasHole, has2Holes, has4Holes, has8Holes, has16Holes, holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
 				
 if __name__ == "__main__":		
 	board = Board()
