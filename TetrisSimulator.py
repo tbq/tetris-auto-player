@@ -12,7 +12,7 @@ import TetrisGame as game
 DIGIT = 4
 DxG = 4
 GENE = DIGIT * DxG + 1
-GENES = 14
+GENES = 23
 SMALLEST_DIGIT = 10
 POPULATION = 100
 CROSSOVER = 0.6

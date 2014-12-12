@@ -20,4 +20,4 @@ weightedHoles
 highestHole
 deepestHole
 filled
-weightedFilled)
+weightedFilled
