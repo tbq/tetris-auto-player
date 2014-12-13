@@ -53,8 +53,8 @@ class TetrisMDP(MDP):
                                     nPieces=screen.nPieces + 1), piece), prob, reward) for piece in pieces.defaultList]
     
     def discount(self):
-#         return 1
-        return 0.6
+        return 1
+#         return 0.6
     
 if __name__ == "__main__":
 	model = TetrisMDP()

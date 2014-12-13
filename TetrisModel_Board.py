@@ -247,6 +247,23 @@ class Board():
 # 		return (hasHole, has2Holes, has4Holes, has8Holes, has16Holes, holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
 # 		return (hasHole, has2Holes, has4Holes, has8Holes, has16Holes, 0, 0, 0, 0, 0, 0, 0)
 		return (0, 0, 0, 0, 0, holes, 0, 0, 0, 0, 0, 0, wellValue, holeDepth, len(rowsWithHoles))
+	
+	def DellacherieFeatures(self):		
+		wellValue = 0
+		holeDepth = 0
+		for col in xrange(self.cols):
+			pile = 0
+			for row in reversed(xrange(self.cols)):
+				cellLeft = self.grid[row,col-1] if col >= 1 else 1
+				cellRight = self.grid[row,col+1] if col < self.cols-1 else 1
+				if cellLeft and cellRight:
+					wellValue += self.getUnderHoles(row, col)
+				if self.grid[row,col]:
+					pile += 1
+				else:
+					holeDepth += pile
+					pile = 0
+		return (wellValue, holeDepth)
 				
 if __name__ == "__main__":		
 	board = Board()

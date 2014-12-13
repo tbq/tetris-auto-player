@@ -27,7 +27,7 @@ def simulateSeedGame(randSeed, weight):
     return gameLoop.gameState.lines
 
 def simulateGame(weight):
-    seeds = range(5)
+    seeds = range(4)
     scores = [simulateSeedGame(seed, weight) for seed in seeds]
     return sum(scores) / len(scores)
 
@@ -54,7 +54,7 @@ def runCrossEntropyIteration(n, k, meanV, sdV):
     return newMeanV, newSdV
 
 def runCrossEntropyMethod(initMeanV, initSdV):
-    n = 100
+    n = 30
     rho = 0.1
     k = int(rho * n)
     meanV = initMeanV
@@ -66,11 +66,12 @@ def runCrossEntropyMethod(initMeanV, initSdV):
         print i, 'sd', sdV
         if i % 10 == 0:
             game.writeWeights('weights_ce{}.tetris'.format(i), meanV)
+            game.writeWeights('sd_ce{}.tetris'.format(i), sdV)
 
 if __name__ == '__main__':
-#     initMeanV = np.zeros(22)
-#     initSdV = np.zeros(22)
-#     initSdV.fill(10)
-    initMeanV = np.array(game.readWeights('weights_ce10.tetris'))
-    initSdV = np.array(game.readWeights('sd_ce10.tetris'))
+    initMeanV = np.zeros(8)
+    initSdV = np.zeros(8)
+    initSdV.fill(10)
+#     initMeanV = np.array(game.readWeights('weights_ce10.tetris'))
+#     initSdV = np.array(game.readWeights('sd_ce10.tetris'))
     runCrossEntropyMethod(initMeanV, initSdV)

@@ -118,8 +118,24 @@ class AdhocEvaluator(Evaluator):
 		phi.append(gameState.board.holes)
 		phi.append(1)
 		return phi		
-		
-		
+
+class DellacherieEvaluator(Evaluator):
+	'''
+	Inspired by Dellacherie
+	'''
+	def __init__(self, weights):
+		self.weights = weights
+
+	def featureExtractor(self, gameState):
+		phi = []
+
+		#(holes, wells, weightedHoles, highestHole, deepestHole, filled, weightedFilled)
+		phi.append(gameState.board.holes)
+		phi.extend(gameState.board.DellacherieFeatures())
+		phi.extend((gameState.landingHeight, gameState.getErodedPieceCells(), 
+				gameState.board.countRowTransitions(), gameState.board.countColTransitions()))
+		phi.append(1)
+		return phi	
 		
 		
 		

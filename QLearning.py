@@ -177,11 +177,11 @@ if __name__ == "__main__":
 #     weights = TetrisGame.readWeights('weightsThiery.tetris')
     #weights = [0.10000000000000001, 0.5, -44.892192895842715, -88.868713917352991, -9.0845044328524125, 99.48473353935913, -0.10000000000000001, -0.10000000000000001, -46.3552758541178784, -44.894981251780582, -49.903753991739844, -48.776916252514777, -56.009249265806467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 #     weights = [random.random() for _ in xrange(22)]
-    weights = TetrisGame.readWeights('weights_ql200.tetris')
+    weights = TetrisGame.readWeights('weights_ql400.tetris')
     
 #     evaluator = AdvancedEvaluator(weights)
     evaluator = AdhocEvaluator(weights)
-    baseSeq = [0,1,2,3,4,5,6]*40
+    baseSeq = [0,1,2,3,4,5,6]*100
 #     random.seed(21)
     random.shuffle(baseSeq);
     
@@ -199,6 +199,6 @@ if __name__ == "__main__":
     qlAvgReward = float(sum(qlRewards))/len(qlRewards)
     print qlAlgo.weights
     print qlAvgReward
-    with open('weights_ql300.tetris', 'w') as f:
+    with open('weights_ql500.tetris', 'w') as f:
         for weight in qlAlgo.weights:
             f.write("{}\n".format(weight))

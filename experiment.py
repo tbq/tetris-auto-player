@@ -32,7 +32,7 @@ def analyze(arr):
     print '95%', np.percentile(arr, 95)
 
 if __name__ == '__main__':
-    weightFile = 'weights_ql300.tetris'     
+    weightFile = 'weights_ql500.tetris'     
     weights = game.readWeights(weightFile)
     linesV, scoresV = simulateGame(weights, 20)
     print '===lines==='

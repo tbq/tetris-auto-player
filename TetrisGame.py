@@ -104,7 +104,8 @@ class Game:
 		self.gameState = GameState(beginState[0], beginState[1], 0, False, False, 0, 0)
 		self.agents = [
 			#agents.ExpectimaxTetrisAgent(0, 1, evalFuncs.BaselineEvaluator()),
-			agents.ExpectimaxTetrisAgent(0, depth, evalFuncs.AdhocEvaluator(weights)),
+# 			agents.ExpectimaxTetrisAgent(0, depth, evalFuncs.AdhocEvaluator(weights)),
+			agents.ExpectimaxTetrisAgent(0, depth, evalFuncs.DellacherieEvaluator(weights)),
 			agents.FinitePieceGenerator(1, seq)
 		]
 	
@@ -155,7 +156,7 @@ def main(argc, argv):
 	#print baseSeq, "\n====\n"
 	
 	#seed(21);
-	seed(4)
+	#seed(4)
 	shuffle(baseSeq);
 	
 	#print baseSeq
