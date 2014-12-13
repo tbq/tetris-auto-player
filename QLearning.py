@@ -7,10 +7,11 @@ import collections
 import random
 import math
 from TetrisModel_MDP import TetrisMDP
-from TetrisEvalFuncs import AdvancedEvaluator
+from TetrisEvalFuncs import AdvancedEvaluator, AdhocEvaluator
 from TetrisGame import GameState
 from TetrisAgents import ExpectimaxTetrisAgent, FinitePieceGenerator
 import util
+import TetrisGame
 
 class RLAlgorithm:
     # Your algorithm will be asked to produce an action given a state.
@@ -25,7 +26,7 @@ class RLAlgorithm:
     def incorporateFeedback(self, state, action, reward, newState): raise NotImplementedError("Override me")
 
 class QLearningAlgorithm(RLAlgorithm):
-    def __init__(self, actions, discount, featureExtractor, weights, explorationProb=0.2):
+    def __init__(self, actions, discount, featureExtractor, weights, explorationProb=0.1):
         self.actions = actions
         self.discount = discount
         self.featureExtractor = featureExtractor
@@ -56,7 +57,8 @@ class QLearningAlgorithm(RLAlgorithm):
 
     # Call this function to get the step size to update the weights.
     def getStepSize(self):
-        return 0.1 / math.sqrt(self.numIters)
+#         return 0.0001 / math.sqrt(self.numIters)
+        return 0.0001
 
     # We will call this function with (s, a, r, s'), which you should use to update |weights|.
     # Note that if s is a terminal state, then s' will be None.  Remember to check for this.
@@ -65,10 +67,27 @@ class QLearningAlgorithm(RLAlgorithm):
     def incorporateFeedback(self, state, action, reward, newState):
         curPrediction = self.getQ(state, action)
         actions = self.actions(newState) if newState else []
+#         print action
+#         for a in actions:
+#             print a
+#         print len(actions), [self.getQ(newState, a) for a in actions]
         newStateOptValue = max(self.getQ(newState, a) for a in actions) if actions else 0
         residual = (reward + self.discount * newStateOptValue) - curPrediction
-        for i, v in enumerate(self.featureExtractor(state, action)):
+#         print 'pred', curPrediction, reward + self.discount * newStateOptValue, residual
+        oldQ = 0
+        newQ = 0
+#         print self.weights
+        diff = []
+        features = self.featureExtractor(state, action)
+        for i, v in enumerate(features):
+            oldQ += self.weights[i] * v
+            diff.append(self.getStepSize() * residual * v)
             self.weights[i] += self.getStepSize() * residual * v
+            newQ += self.weights[i] * v
+#         print 'Q', oldQ, newQ, self.getStepSize()
+#         print 'diff', diff
+#         print 'max', max(features), max(self.weights)
+#         print self.weights
             
 def simulate(mdp, rl, numTrials=10, maxIterations=100, verbose=False):
     # Return i in [0, ..., len(probs)-1] with probability probs[i].
@@ -86,7 +105,7 @@ def simulate(mdp, rl, numTrials=10, maxIterations=100, verbose=False):
         sequence = [state]
         totalDiscount = 1
         totalReward = 0
-        for _ in range(maxIterations):
+        for it in xrange(maxIterations):
             if state is None:
                 break
             #util.printGrid(state.board.grid)
@@ -110,11 +129,17 @@ def simulate(mdp, rl, numTrials=10, maxIterations=100, verbose=False):
             totalDiscount *= mdp.discount()
             state = newState
         if verbose:
-            print "Trial %d (totalReward = %s): %s" % (trial, totalReward, sequence)
+#             print "Trial %d Iter %d (totalReward = %s): %s" % (trial, it, totalReward, sequence)
+            print "Trial %d Iter %d (totalReward = %s)" % (trial, it, totalReward)
         totalRewards.append(totalReward)
+        if trial % 20 == 0:
+            print 'Avg Reward = %f' % (sum(totalRewards[-20:]) / float(len(totalRewards[-20:])))
     return totalRewards
 
 class TetrisGameMDP():
+    '''
+    A class which encapsulates a Tetris game as an MDP
+    '''
     
     def __init__(self, tetris, player, opponent):
         self.tetris = tetris
@@ -131,7 +156,8 @@ class TetrisGameMDP():
     def succAndProbReward(self, state, action):
         nextState = state.generateSuccessor(0, action)
         oppoActions = state.getActions(1)
-        newGrid, reward = action
+        newGrid, linesCleared, cellsRemoved, landingHeight = action
+        reward = linesCleared
         prob = 1.0 / len(oppoActions)
         successors = [nextState.generateSuccessor(1, oppoAction) for oppoAction in oppoActions]
         output = []
@@ -139,17 +165,25 @@ class TetrisGameMDP():
             if successor.isWin():
                 successor = None
             elif successor.isLose():
-                reward = -100
+#                 reward = -100
                 successor = None
             output.append((successor, prob, reward))
         return output
     
     def discount(self):
-        return 1
+        return self.tetris.discount()
           
 if __name__ == "__main__":
-    evaluator = AdvancedEvaluator([])
-    baseSeq = [0,1,2,3,4,5,6]*20
+#     weights = TetrisGame.readWeights('weightsThiery.tetris')
+    #weights = [0.10000000000000001, 0.5, -44.892192895842715, -88.868713917352991, -9.0845044328524125, 99.48473353935913, -0.10000000000000001, -0.10000000000000001, -46.3552758541178784, -44.894981251780582, -49.903753991739844, -48.776916252514777, -56.009249265806467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+#     weights = [random.random() for _ in xrange(22)]
+    weights = TetrisGame.readWeights('weights_ql200.tetris')
+    
+#     evaluator = AdvancedEvaluator(weights)
+    evaluator = AdhocEvaluator(weights)
+    baseSeq = [0,1,2,3,4,5,6]*40
+#     random.seed(21)
+    random.shuffle(baseSeq);
     
     # state: (board, new piece)
     # action: (newGrid, reward)
@@ -159,9 +193,12 @@ if __name__ == "__main__":
         return output
     
     model = TetrisGameMDP(TetrisMDP(), ExpectimaxTetrisAgent(0, 1, evaluator), FinitePieceGenerator(baseSeq))
-    weights = [0.10000000000000001, 0.5, -44.892192895842715, -88.868713917352991, -9.0845044328524125, 99.48473353935913, -0.10000000000000001, -0.10000000000000001, -46.3552758541178784, -44.894981251780582, -49.903753991739844, -48.776916252514777, -56.009249265806467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    
     qlAlgo = QLearningAlgorithm(model.actions, model.discount(), featureExtractor, weights)
-    qlRewards = simulate(model, qlAlgo, numTrials = 50)
+    qlRewards = simulate(model, qlAlgo, numTrials = 100, verbose=True)
     qlAvgReward = float(sum(qlRewards))/len(qlRewards)
     print qlAlgo.weights
     print qlAvgReward
+    with open('weights_ql300.tetris', 'w') as f:
+        for weight in qlAlgo.weights:
+            f.write("{}\n".format(weight))

@@ -29,6 +29,9 @@ class GameState:
 		self.tetris = tetris.TetrisMDP()
 		if self.board.findMaxHeight() >= self.board.rows:
 			self.lose = True
+		self.linesJustCleared = 0
+		self.cellsJustCleared = 0
+		self.landingHeight = 0
 
 	def isGameOver(self):
 		return self.lose or self.win
@@ -50,6 +53,9 @@ class GameState:
 		
 	def getTotalPiecesProcessed(self):
 		return self.rounds
+	
+	def getErodedPieceCells(self):
+		return self.linesJustCleared * self.cellsJustCleared
 		
 	def getNumAgents(self):
 		return 2
@@ -68,15 +74,19 @@ class GameState:
 		if self.isGameOver():
 			raise Exception('Game is over, no more successors to generate')
 			
-		newState = GameState(deepcopy(self.board), deepcopy(self.piece), self.score,
-				self.lose, self.win, self.rounds, self.lines)
+# 		newState = GameState(deepcopy(self.board), deepcopy(self.piece), self.score,
+# 				self.lose, self.win, self.rounds, self.lines)
+		newState = deepcopy(self)
 		
 		if agentIndex == 0:
-			newGrid, reward = action
+			newGrid, linesCleared, cellsRemoved, landingHeight = action
 			newState.board.updateGrid(newGrid)
-			newState.lines += reward
-			newState.score += reward*reward
+			newState.lines += linesCleared
+			newState.score += linesCleared*linesCleared
 			newState.rounds += 1
+			newState.linesJustCleared = linesCleared
+			newState.cellsJustCleared = cellsRemoved
+			newState.landingHeight = landingHeight
 		else:
 			newState.piece = action
 		
@@ -94,20 +104,22 @@ class Game:
 		self.gameState = GameState(beginState[0], beginState[1], 0, False, False, 0, 0)
 		self.agents = [
 			#agents.ExpectimaxTetrisAgent(0, 1, evalFuncs.BaselineEvaluator()),
-			agents.ExpectimaxTetrisAgent(0, depth, evalFuncs.AdvancedEvaluator(weights)),
+			agents.ExpectimaxTetrisAgent(0, depth, evalFuncs.AdhocEvaluator(weights)),
 			agents.FinitePieceGenerator(1, seq)
 		]
 	
-	def run(self):
+	def run(self, verbose=False):
 		agentIndex = 0
 		while not self.gameState.isGameOver():
-			if agentIndex == 0:
+			if verbose and agentIndex == 0:
 				util.printGrid(self.gameState.board.grid)
+				print self.agents[0].evaluator.featureExtractor(self.gameState)
 
 			agent = self.agents[agentIndex]
 			action = agent.getAction(self.gameState)
 			
-			self.moveHistory.append((agentIndex, action))
+			if verbose:
+				self.moveHistory.append((agentIndex, action))
 			
 			if action is None:
 				break
@@ -118,30 +130,32 @@ class Game:
 			
 		#print self.moveHistory
 		#util.printGrid(self.moveHistory[-3][1][0])
-		print 'Final score:', self.gameState.score
-		print 'Lines completed:', self.gameState.lines
-		print 'Pieces played:', self.gameState.rounds - 1
+		if verbose:
+			print 'Final score:', self.gameState.score
+			print 'Lines completed:', self.gameState.lines
+			print 'Pieces played:', self.gameState.rounds - 1
 		
 def readWeights(filename):
-	wF = open(filename)
-	w = []
-	
-	wString = wF.readline()
-	while wString:
-		w.append(float(wString))
-		wString = wF.readline()
-		
-	return w
+	with open(filename, 'r') as f:
+		w = []
+		for line in f:
+			w.append(float(line))
+		return w
+
+def writeWeights(filename, weights):
+	with open(filename, 'w') as f:
+		for weight in weights:
+			f.write('{}\n'.format(weight))
 	
 def main(argc, argv):
 	print "Tetris Game Simulation"
 	print '============================='
 	
-	baseSeq = [0,1,2,3,4,5,6]*20;
+	baseSeq = [0,1,2,3,4,5,6]*100;
 	#print baseSeq, "\n====\n"
 	
 	#seed(21);
-	seed(21)
+	seed(4)
 	shuffle(baseSeq);
 	
 	#print baseSeq
@@ -149,11 +163,13 @@ def main(argc, argv):
 	if argc > 1:
 		weightFile = argv[1]
 	else:
-		weightFile = 'weights.tetris'
+# 		weightFile = 'weights_ql300.tetris'
 # 		weightFile = 'geneticWeights.tetris'
 # 		weightFile = 'geneticWeightsGen0.tetris'
 # 		weightFile = 'geneticWeightsGen1.tetris'
 # 		weightFile = 'geneticWeightsGen9.tetris'
+# 		weightFile = 'weightsThiery.tetris'
+		weightFile = 'weights_ce10.tetris'
 		
 	weights = readWeights(weightFile)
 	#weights = [0.10000000000000001, 0.5, -44.892192895842715, -88.868713917352991, -9.0845044328524125, 99.48473353935913, -0.10000000000000001, -0.10000000000000001, -46.3552758541178784, -44.894981251780582, -49.903753991739844, -48.776916252514777, -56.009249265806467, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -165,7 +181,7 @@ def main(argc, argv):
 	
 	gameLoop = Game()
 	gameLoop.startGame(1, baseSeq, weights)
-	gameLoop.run()
+	gameLoop.run(True)
 	
 if __name__ == '__main__':
 	main(len(sys.argv), sys.argv)
